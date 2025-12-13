@@ -11,9 +11,9 @@ export async function startDevServer(sessionId, cwd, framework) {
 
   // 👇 determine public host
   const host =
-  process.env.FLY_APP_NAME
-    ? `https://${process.env.FLY_APP_NAME}.fly.dev`
-    : "http://localhost";
+    process.env.RENDER_EXTERNAL_HOSTNAME
+      ? `https://${process.env.RENDER_EXTERNAL_HOSTNAME}`
+      : "http://localhost";
 
   return new Promise((resolve, reject) => {
     const dev = spawn("npm", ["run", "dev"], {
