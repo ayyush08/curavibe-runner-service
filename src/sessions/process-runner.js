@@ -5,7 +5,7 @@ import { sessionPorts } from "./session-registry.js";
 
 export function installDependencies(cwd) {
     return new Promise((resolve, reject) => {
-        const installer = spawn("npm", ["install", "--no-audit", "--no-fund"], {
+        const installer = spawn("npm", ["install", "--include=dev","--no-audit", "--no-fund"], {
             cwd,
             stdio: "inherit",
             shell: true
@@ -46,6 +46,7 @@ export async function startDevServer(sessionId, cwd, framework) {
       if (!previewResolved && detectPreviewReady(line)) {
         previewResolved = true;
 
+        sessionPorts.set(sessionId, port);
         resolve({
   url: `${host}/preview/${sessionId}`,
   pid: dev.pid,
@@ -56,7 +57,6 @@ export async function startDevServer(sessionId, cwd, framework) {
 
     dev.stderr.on("data", (data) => console.error(data.toString()));
 
-    sessionPorts.set(sessionId, port);
     dev.on("exit", (code) => {
       if (!previewResolved) {
         reject(new Error("Dev server exited before startup"));
