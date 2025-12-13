@@ -1,10 +1,31 @@
 import express from "express";
 import cors from "cors";
 import { createSession } from "./sessions/session-manager.js";
+import { createProxyMiddleware } from "http-proxy-middleware";
+import { sessionPorts } from "./sessions/session-registry.js";
 
 const app = express();
 app.use(cors());
 app.use(express.json({ limit: "50mb" }));
+
+app.use("/preview/:sessionId", (req, res, next) => {
+  const port = sessionPorts.get(req.params.sessionId);
+  if (!port) {
+    return res.status(404).send("Session not found");
+  }
+
+  return createProxyMiddleware({
+    target: `http://127.0.0.1:${port}`,
+    changeOrigin: true,
+    ws: true,
+  })(req, res, next);
+});
+
+
+app.get('/health', (req, res) => {
+  res.send('OK');
+});
+
 
 app.post("/start", async (req, res) => {
     const structure = req.body.files || req.body; // FIX
