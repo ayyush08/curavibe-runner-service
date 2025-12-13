@@ -1,5 +1,11 @@
-export function detectPreviewUrl(text) {
-  const regex = /(http:\/\/localhost:\d+)/;
-  const match = text.match(regex);
-  return match ? match[1] : null;
+export function detectPreviewReady(text) {
+  const lower = text.toLowerCase();
+
+  return (
+    lower.includes("ready") ||
+    lower.includes("local:") ||          // Vite
+    lower.includes("started server") ||  // Next.js
+    lower.includes("listening on") ||     // Hono / Express
+    lower.includes("http://")             // fallback
+  );
 }
