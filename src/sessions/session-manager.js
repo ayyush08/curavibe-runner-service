@@ -20,23 +20,29 @@ export async function createSession(structure, framework) {
     const baseTmp = os.tmpdir();                // ← FIXED
     const baseDir = path.join(baseTmp, `curavibe-${sessionId}`);
 
-    await fs.ensureDir(baseDir);
-
-    console.log("Flattening folder structure...");
-    const flatFiles = flattenTemplate(structure);
-    console.log("Flattened:");
-
-    console.log("Writing files...");
-    await writeFilesToDisk(baseDir, flatFiles);
-
-    console.log("Installing dependencies...");
-    await installDependencies(baseDir);
-
-    console.log("Starting dev server...");
-    const { url, pid } = await startDevServer(sessionId, baseDir,framework);
-
-    setTimeout(() => cleanupSession(baseDir, pid), 5 * 60 * 1000);
-
-    return { sessionId, previewUrl: url };
+   try {
+     await fs.ensureDir(baseDir);
+ 
+     console.log("Flattening folder structure...");
+     const flatFiles = flattenTemplate(structure);
+     console.log("Flattened:");
+ 
+     console.log("Writing files...");
+     await writeFilesToDisk(baseDir, flatFiles);
+ 
+     console.log("Installing dependencies...");
+     await installDependencies(baseDir);
+ 
+     console.log("Starting dev server...");
+     const { url, pid } = await startDevServer(sessionId, baseDir,framework);
+ 
+     setTimeout(() => cleanupSession(baseDir, pid), 5 * 60 * 1000);
+ 
+     return { sessionId, previewUrl: url };
+   } catch (error) {
+    console.error("Error during session creation:", error);
+    activeSession = false;
+    throw error;
+   }
 
 }
