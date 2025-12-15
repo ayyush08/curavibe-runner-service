@@ -2,6 +2,7 @@ import { spawn } from "child_process";
 import getPort from "get-port";
 import { detectPreviewReady } from "../utils/detect-preview-url.js";
 import { sessionPorts } from "./session-registry.js";
+import { cleanupSession } from "./cleanup.js";
 
 export function installDependencies(cwd) {
     return new Promise((resolve, reject) => {
@@ -22,7 +23,8 @@ function portRange(start, end) {
 }
 
 export async function startDevServer(sessionId, cwd, framework) {
-  const port = await getPort({ port: portRange(3000, 3999) });
+  // const port = await getPort({ port: portRange(3000, 3999) });
+  const port = process.env.PORT
 
   // 👇 determine public host
   const host =
@@ -65,8 +67,9 @@ export async function startDevServer(sessionId, cwd, framework) {
 
     dev.on("exit", (code) => {
       if (!previewResolved) {
-        reject(new Error("Dev server exited before startup"));
+        console.warn("Dev server exited before preview was ready");
       }
+      cleanupSession(cwd, dev.pid);
       sessionPorts.delete(sessionId);
       console.log(`Dev server for session ${sessionId} exited with code ${code}`);
     });
