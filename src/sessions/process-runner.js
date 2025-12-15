@@ -46,7 +46,13 @@ export async function startDevServer(sessionId, cwd, framework) {
       if (!previewResolved && detectPreviewReady(line)) {
         previewResolved = true;
 
-        sessionPorts.set(sessionId, port);
+        sessionPorts.set(sessionId, {
+  baseDir: cwd,
+  port,
+  pid: dev.pid,
+  createdAt: Date.now(),
+});
+
         resolve({
   url: `${host}/preview/${sessionId}`,
   pid: dev.pid,
